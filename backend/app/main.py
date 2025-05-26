@@ -1,4 +1,4 @@
-from flask import Flask, app
+from flask import Flask
 from flask_cors import CORS
 from flasgger import Swagger
 from app.services.db import init_db, db  # import db and init_db
@@ -30,14 +30,18 @@ def create_app():
             description: API is running
         """
         return {"status": "ok"}, 200
+
     # Register blueprints
     app.register_blueprint(team_bp)
     app.register_blueprint(match_bp)
     app.register_blueprint(player_bp)
     app.register_blueprint(area_bp)
+
     return app
 
 if __name__ == "__main__":
-    db.create_all()  # Create tables
-    DatabaseSeeder.seed_database()  # Seed initial data
+    app = create_app()  # create the app instance
+    with app.app_context():  # push the application context
+        db.create_all()  # ✅ Create tables inside app context
+        DatabaseSeeder.seed_database()  # ✅ Seed data inside app context
     app.run(debug=True)
