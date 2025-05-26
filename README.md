@@ -65,6 +65,11 @@ source venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 python app.py
 ```
+5. Initialize the database:
+```bash
+# While in the backend directory with venv activated
+python -m flask db upgrade
+python -m flask seed-db  # 
 
 ## API Endpoints
 
@@ -119,7 +124,3 @@ VITE_API_URL=http://localhost:5000/api
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.

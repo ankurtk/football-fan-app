@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, app
 from flask_cors import CORS
 from flasgger import Swagger
 from app.services.db import init_db, db  # import db and init_db
@@ -6,6 +6,7 @@ from app.routes.teams import team_bp
 from app.routes.matches import match_bp
 from app.routes.players import player_bp
 from app.routes.areas import area_bp
+from database.seeder import DatabaseSeeder
 
 def create_app():
     app = Flask(__name__)
@@ -37,7 +38,6 @@ def create_app():
     return app
 
 if __name__ == "__main__":
-    app = create_app()
-    with app.app_context():
-        db.create_all()  # Create tables if not exist
+    db.create_all()  # Create tables
+    DatabaseSeeder.seed_database()  # Seed initial data
     app.run(debug=True)
