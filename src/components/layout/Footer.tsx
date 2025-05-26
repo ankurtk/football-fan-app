@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
               Your go-to platform for football matches, teams, and player information.
             </p>
             <div className="flex space-x-4">
-              <a href="https://github.com" className="text-gray-400 hover:text-white transition-colors duration-200">
+              <a href="https://github.com/ankurtk/football-fan-app" className="text-gray-400 hover:text-white transition-colors duration-200">
                 <Github size={20} />
               </a>
             </div>
