@@ -43,7 +43,7 @@ A modern web application for tracking football matches, teams, and players with 
 1. Clone the repository:
 ```bash
 git clone <your-repository-url>
-cd football-tracker
+cd football-fan-app
 ```
 
 2. Install frontend dependencies:
