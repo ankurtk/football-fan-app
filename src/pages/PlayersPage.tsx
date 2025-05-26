@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Filter, Users } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import Spinner from '../components/ui/Spinner';
+import { Users } from 'lucide-react';
 
 interface Player {
   id: number;
@@ -14,122 +14,45 @@ interface Player {
   };
 }
 
-interface Filters {
-  name?: string;
-  nationality?: string;
-  position?: string;
-  team_name?: string;
-}
-
 const PlayersPage: React.FC = () => {
+  const location = useLocation();
+  const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [filters, setFilters] = useState<Filters>({});
-  const [showFilters, setShowFilters] = useState(false);
+
+  // Get nationality from location state
+  const nationality = location.state?.nationality;
 
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
         setLoading(true);
-        setError(null);
+        // Add nationality to API call if it exists
+        const url = nationality
+          ? `http://localhost:5000/api/players?nationality=${encodeURIComponent(nationality)}`
+          : 'http://localhost:5000/api/players';
 
-        // Build query params
-        const params = new URLSearchParams();
-        if (filters.name) params.append('name', filters.name);
-        if (filters.nationality) params.append('nationality', filters.nationality);
-        if (filters.position) params.append('position', filters.position);
-        if (filters.team_name) params.append('team_name', filters.team_name);
-
-        const response = await fetch(`http://localhost:5000/api/players?${params}`);
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Failed to fetch players');
         }
-
         const data = await response.json();
-        setPlayers(data.data);
+        setPlayers(data.data || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load players');
-        console.error('Error fetching players:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    const debounceTimer = setTimeout(() => {
-      fetchPlayers();
-    }, 300);
-
-    return () => clearTimeout(debounceTimer);
-  }, [filters]);
-
-  const handleFilterChange = (key: keyof Filters, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
+    fetchPlayers();
+  }, [nationality]);
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Football Players</h1>
         <p className="text-gray-600">Browse and search for players.</p>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="mb-6 space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search players..."
-              value={filters.name || ''}
-              onChange={(e) => handleFilterChange('name', e.target.value)}
-              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            <Filter size={18} className="mr-2" />
-            Filters
-          </button>
-        </div>
-
-        {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-md">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
-              <input
-                type="text"
-                value={filters.nationality || ''}
-                onChange={(e) => handleFilterChange('nationality', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                placeholder="Filter by nationality"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-              <input
-                type="text"
-                value={filters.position || ''}
-                onChange={(e) => handleFilterChange('position', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                placeholder="Filter by position"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
-              <input
-                type="text"
-                value={filters.team_name || ''}
-                onChange={(e) => handleFilterChange('team_name', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                placeholder="Filter by team"
-              />
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Error State */}
@@ -147,9 +70,8 @@ const PlayersPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {players.map(player => (
-            <Link
+            <div
               key={player.id}
-              to={`/players/${player.id}`}
               className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6"
             >
               <div className="flex items-center justify-center mb-4">
@@ -161,7 +83,7 @@ const PlayersPage: React.FC = () => {
                 <p className="text-sm text-gray-500">{player.team.name}</p>
                 <p className="text-sm text-gray-500">{player.nationality}</p>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

@@ -1,8 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin,} from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 import Spinner from '../components/ui/Spinner';
 import { Area, areaService } from '../apis/getArea.api';
+import * as flags from 'country-flag-icons/react/3x2';
+
+// Add a helper function to get country code and flag
+const getCountryFlag = (countryName: string) => {
+  const countryMapping: { [key: string]: keyof typeof flags } = {
+    'England': 'GB',
+    'Spain': 'ES',
+    'Germany': 'DE',
+    'France': 'FR',
+    'Italy': 'IT',
+    'Netherlands': 'NL',
+    'Portugal': 'PT',
+    'Brazil': 'BR',
+    'Argentina': 'AR',
+    'United States': 'US',
+    'Belgium': 'BE',
+    // Add more mappings as needed
+  };
+
+  const countryCode = countryMapping[countryName];
+  if (countryCode && flags[countryCode]) {
+    const FlagComponent = flags[countryCode];
+    return <FlagComponent />;
+  }
+  return null;
+};
 
 const AreasPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -97,11 +123,19 @@ const AreasPage: React.FC = () => {
             >
               <div className="relative h-36 overflow-hidden rounded-t-lg bg-gray-100">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
-                <img
-                  src={area.flag}
-                  alt={`${area.name} flag`}
-                  className="w-full h-full object-cover"
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  {getCountryFlag(area.name) ? (
+                    <div className="w-full h-full">
+                      {React.cloneElement(getCountryFlag(area.name) as React.ReactElement, {
+                        className: 'w-full h-full object-cover'
+                      })}
+                    </div>
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <MapPin size={32} className="text-gray-400" />
+                    </div>
+                  )}
+                </div>
                 <div className="absolute bottom-0 left-0 p-4 z-20">
                   <h3 className="text-white font-bold text-xl">{area.name}</h3>
                   <div className="flex items-center text-white/90 text-sm">

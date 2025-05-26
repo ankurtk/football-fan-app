@@ -11,6 +11,7 @@ import PlayersPage from './pages/PlayersPage';
 import AreasPage from './pages/AreasPage';
 import NotFoundPage from './pages/NotFoundPage';
 import MatchDetailPage from './pages/MatchDetailPage';
+import AreaDetailPage from './pages/AreaDetailPage';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/players/:id" element={<PlayerDetailPage />} />
             <Route path="/areas" element={<AreasPage />} />
             <Route path="/matches/:id" element={<MatchDetailPage />} />
+            <Route path="/areas/:id" element={<AreaDetailPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>

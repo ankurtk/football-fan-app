@@ -26,14 +26,24 @@ teams_schema = TeamSchema(many=True)
 })
 def get_teams():
     try:
-        search_term = request.args.get('name', '')
-        teams = Team.search_by_name(search_term)
+        # Get filter parameters
+        filters = {
+            'name': request.args.get('name'),
+            'area': request.args.get('area')
+        }
+
+        # Print debug information
+        print(f"Received filters: {filters}")
+
+        # Use the filtered query method
+        teams = Team.get_filtered_teams(filters)
         result = teams_schema.dump(teams)
+
+        print(f"Found {len(teams)} teams")
         return jsonify({'success': True, 'data': result})
     except Exception as e:
         print(f"Error in get_teams: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
-
 @team_bp.route('/api/teams/<int:id>', methods=['GET'])
 def get_team(id):
     team = Team.query.get_or_404(id)

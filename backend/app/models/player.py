@@ -1,3 +1,4 @@
+from flask import request
 from app.services.db import db
 from sqlalchemy import or_
 

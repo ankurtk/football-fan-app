@@ -1,37 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import Spinner from '../components/ui/Spinner';
-import { Team, teamService } from '../apis/getTeams.api';
-;
+import { Team } from '../apis/getTeams.api';
 
 const TeamsPage: React.FC = () => {
+  const location = useLocation();
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+
+  // Get area from location state
+  const area = location.state?.area;
 
   useEffect(() => {
     const fetchTeams = async () => {
       try {
         setLoading(true);
-        setError(null);
-        const data = await teamService.getTeams(searchTerm);
-        setTeams(data);
+        // Add area to API call if it exists
+        const url = area
+          ? `http://localhost:5000/api/teams?area=${encodeURIComponent(area)}`
+          : 'http://localhost:5000/api/teams';
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Failed to fetch teams');
+        }
+        const data = await response.json();
+        setTeams(data.data || []);
       } catch (err) {
-        setError('Failed to fetch teams. Please try again later.');
-        console.error('Error fetching teams:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load teams');
       } finally {
         setLoading(false);
       }
     };
 
-    const debounceTimer = setTimeout(() => {
-      fetchTeams();
-    }, 300);
-
-    return () => clearTimeout(debounceTimer);
-  }, [searchTerm]);
+    fetchTeams();
+  }, [area]);
 
   return (
     <div>
@@ -47,8 +52,8 @@ const TeamsPage: React.FC = () => {
           <input
             type="text"
             placeholder="Search for a team..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            // value={searchTerm}
+            // onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

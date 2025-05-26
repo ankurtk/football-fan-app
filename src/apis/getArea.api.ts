@@ -22,7 +22,7 @@ export const areaService = {
 
   getAreaById: async (id: number) => {
     const response = await axios.get(`${API_URL}/areas/${id}`);
-    return response.data;
+    return response;
   },
 
   searchAreas: async (searchTerm: string) => {
