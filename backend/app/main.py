@@ -6,7 +6,7 @@ from app.routes.teams import team_bp
 from app.routes.matches import match_bp
 from app.routes.players import player_bp
 from app.routes.areas import area_bp
-from database.seeder import DatabaseSeeder
+from .database.seeder import DatabaseSeeder
 
 def create_app():
     app = Flask(__name__)
