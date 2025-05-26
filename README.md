@@ -65,11 +65,6 @@ source venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 python -m app.main
 ```
-5. Initialize the database:
-```bash
-# While in the backend directory with venv activated
-python -m flask db upgrade
-python -m flask seed-db  # 
 
 ## API Endpoints
 
@@ -110,8 +105,6 @@ npm run lint
 ```
 
 ## Environment Variables
-
-Create a `.env` file in the root directory:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
