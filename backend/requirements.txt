@@ -5,3 +5,5 @@ Flask-Cors
 marshmallow
 marshmallow-sqlalchemy
 flasgger
+requests
+python-dotenv

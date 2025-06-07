@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
               <li><Link to="/matches" className="text-gray-400 hover:text-white transition-colors duration-200">Matches</Link></li>
               <li><Link to="/teams" className="text-gray-400 hover:text-white transition-colors duration-200">Teams</Link></li>
               <li><Link to="/players" className="text-gray-400 hover:text-white transition-colors duration-200">Players</Link></li>
-              <li><Link to="/areas" className="text-gray-400 hover:text-white transition-colors duration-200">Areas</Link></li>
+              <li><span className="text-gray-500 cursor-not-allowed">Areas (Coming Soon)</span></li>
             </ul>
           </div>
 

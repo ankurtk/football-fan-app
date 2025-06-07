@@ -1,59 +1,136 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { Search, Users } from 'lucide-react';
 import Spinner from '../components/ui/Spinner';
-import { Users } from 'lucide-react';
-
-interface Player {
-  id: number;
-  name: string;
-  position: string;
-  nationality: string;
-  team: {
-    id: number;
-    name: string;
-  };
-}
+import PlayerCard from '../components/PlayerCard';
+import { Player, playerService } from '../apis/getPlayers.api';
+import { teamService, Team } from '../apis/getTeams.api';
+import CompetitionSelector from '../components/CompetitionSelector';
 
 const PlayersPage: React.FC = () => {
-  const location = useLocation();
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [selectedLeague, setSelectedLeague] = useState(39); // Premier League default
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchMode, setSearchMode] = useState<'team' | 'name'>('team');
+  const [season] = useState(2024);
 
-  // Get nationality from location state
-  const nationality = location.state?.nationality;
-
+  // Fetch teams when league changes
   useEffect(() => {
-    const fetchPlayers = async () => {
+    const fetchTeams = async () => {
       try {
         setLoading(true);
-        // Add nationality to API call if it exists
-        const url = nationality
-          ? `http://localhost:5000/api/players?nationality=${encodeURIComponent(nationality)}`
-          : 'http://localhost:5000/api/players';
-
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error('Failed to fetch players');
-        }
-        const data = await response.json();
-        setPlayers(data.data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load players');
+        // Use RapidAPI teams endpoint
+        const teamsData = await teamService.getTeams(selectedLeague, season);
+        setTeams(teamsData);
+        setSelectedTeam('');
+        setPlayers([]);
+      } catch{
+        setError('Failed to fetch teams');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPlayers();
-  }, [nationality]);
+    if (searchMode === 'team') {
+      fetchTeams();
+    }
+  }, [selectedLeague, searchMode, season]);
+
+  // Fetch players when team is selected
+  useEffect(() => {
+    const fetchPlayersByTeam = async () => {
+      if (!selectedTeam || searchMode !== 'team') {
+        setPlayers([]);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const playersData = await playerService.getPlayersByTeam(parseInt(selectedTeam), season);
+        setPlayers(playersData);
+      } catch{
+        setError('Failed to fetch players. Try selecting a different team.');
+        setPlayers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlayersByTeam();
+  }, [selectedTeam, searchMode, season]);
+
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Football Players</h1>
-        <p className="text-gray-600">Browse and search for players.</p>
+        <p className="text-gray-600">Browse players by team with detailed statistics from major leagues.</p>
       </div>
+
+      {/* Search Mode Toggle */}
+      <div className="mb-6">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setSearchMode('team')}
+            className={`px-4 py-2 rounded-md ${
+              searchMode === 'team'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Browse by Team
+          </button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      {searchMode === 'team' ? (
+        <div className="mb-6 flex flex-col md:flex-row gap-4">
+          <CompetitionSelector
+            selectedLeague={selectedLeague}
+            onLeagueChange={setSelectedLeague}
+            className="md:w-48"
+          />
+
+          <select
+            value={selectedTeam}
+            onChange={(e) => setSelectedTeam(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 md:w-64"
+          >
+            <option value="">Select a team...</option>
+            {teams.map(team => (
+              <option key={team.id} value={team.id.toString()}>
+                {team.name}
+              </option>
+            ))}
+          </select>
+
+          <div className="text-sm text-gray-600 flex items-center">
+            Season: {season}
+          </div>
+        </div>
+      ) : (
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search players by name (e.g., Messi, Haaland, Mbappe)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <p className="mt-2 text-sm text-gray-600">
+            Search across all major leagues and teams.
+          </p>
+        </div>
+      )}
 
       {/* Error State */}
       {error && (
@@ -62,38 +139,43 @@ const PlayersPage: React.FC = () => {
         </div>
       )}
 
-      {/* Players Grid */}
-      {loading ? (
+      {/* Loading State */}
+      {loading && (
         <div className="flex justify-center items-center py-12">
           <Spinner size="lg" />
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      )}
+
+      {/* No Selection State */}
+      {!loading && searchMode === 'team' && !selectedTeam && (
+        <div className="text-center py-12">
+          <Users size={48} className="mx-auto text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Select a Team</h3>
+          <p className="text-gray-500">Choose a league and team to view players with detailed statistics.</p>
+        </div>
+      )}
+
+      {/* Players Grid */}
+      {!loading && players.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {players.map(player => (
-            <div
-              key={player.id}
-              className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6"
-            >
-              <div className="flex items-center justify-center mb-4">
-                <Users className="w-12 h-12 text-gray-400" />
-              </div>
-              <div className="text-center">
-                <h3 className="font-semibold text-lg mb-2">{player.name}</h3>
-                <p className="text-gray-600">{player.position}</p>
-                <p className="text-sm text-gray-500">{player.team.name}</p>
-                <p className="text-sm text-gray-500">{player.nationality}</p>
-              </div>
-            </div>
+            <Link key={player.id} to={`/players/${player.id}`}>
+              <PlayerCard player={player} />
+            </Link>
           ))}
         </div>
       )}
 
-      {/* Empty State */}
-      {!loading && players.length === 0 && (
-        <div className="text-center py-12">
-          <Users size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No players found</h3>
-          <p className="text-gray-600">Try adjusting your filters to find what you're looking for.</p>
+      {/* No Results */}
+      {!loading && (
+        (searchMode === 'team' && selectedTeam && players.length === 0) ||
+        (searchMode === 'name' && searchTerm && players.length === 0)
+      ) && (
+        <div className="text-center text-gray-500 py-12">
+          {searchMode === 'team'
+            ? 'No players found for this team'
+            : `No players found matching "${searchTerm}"`
+          }
         </div>
       )}
     </div>

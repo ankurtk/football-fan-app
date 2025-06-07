@@ -12,10 +12,13 @@ import AreasPage from './pages/AreasPage';
 import NotFoundPage from './pages/NotFoundPage';
 import MatchDetailPage from './pages/MatchDetailPage';
 import AreaDetailPage from './pages/AreaDetailPage';
+import PlayerSearchPage from './pages/PlayerSearchPage';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="flex flex-col min-h-screen bg-gray-50">
         <Navbar />
         <main className="flex-grow container mx-auto px-4 py-6">
@@ -26,6 +29,7 @@ function App() {
             <Route path="/teams/:id" element={<TeamDetailPage />} />
             <Route path="/players" element={<PlayersPage />} />
             <Route path="/players/:id" element={<PlayerDetailPage />} />
+            <Route path="/players/search" element={<PlayerSearchPage />} />
             <Route path="/areas" element={<AreasPage />} />
             <Route path="/matches/:id" element={<MatchDetailPage />} />
             <Route path="/areas/:id" element={<AreaDetailPage />} />

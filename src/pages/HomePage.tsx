@@ -46,7 +46,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Explore Sections */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Link to="/matches" className="card group p-6 hover:shadow-lg transition-all duration-300">
           <div className="mb-4 bg-blue-100 text-blue-600 p-3 rounded-full w-fit group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
             <Calendar size={24} />
@@ -63,21 +63,27 @@ const HomePage: React.FC = () => {
           <p className="text-gray-600 mt-2">Discover teams and their roster information.</p>
         </Link>
 
-        <Link to="/areas" className="card group p-6 hover:shadow-lg transition-all duration-300">
-          <div className="mb-4 bg-amber-100 text-amber-600 p-3 rounded-full w-fit group-hover:bg-amber-600 group-hover:text-white transition-colors duration-300">
-            <Map size={24} />
-          </div>
-          <h3 className="text-lg font-semibold">Areas</h3>
-          <p className="text-gray-600 mt-2">Find matches in specific locations and regions.</p>
-        </Link>
-
         <Link to="/players" className="card group p-6 hover:shadow-lg transition-all duration-300">
-          <div className="mb-4 bg-green-100 text-green-600 p-3 rounded-full w-fit group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
+          <div className="mb-4 bg-purple-100 text-purple-600 p-3 rounded-full w-fit group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
             <Users size={24} />
           </div>
           <h3 className="text-lg font-semibold">Players</h3>
           <p className="text-gray-600 mt-2">Explore player profiles and statistics.</p>
         </Link>
+
+        {/* Replace Areas card with Under Construction */}
+        <div className="card p-6 bg-gray-50 border-dashed border-2 border-gray-300">
+          <div className="mb-4 bg-yellow-100 text-yellow-600 p-3 rounded-full w-fit">
+            <Map size={24} />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-600">Areas</h3>
+          <p className="text-gray-500 mt-2">Coming soon - Browse teams and matches by location.</p>
+          <div className="mt-4">
+            <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
+              Under Construction
+            </span>
+          </div>
+        </div>
       </section>
     </div>
   );

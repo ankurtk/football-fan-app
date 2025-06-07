@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
     { path: '/matches', label: 'Matches' },
     { path: '/teams', label: 'Teams' },
     { path: '/players', label: 'Players' },
-    { path: '/areas', label: 'Areas' },
+    // { path: '/areas', label: 'Areas' },
   ];
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -39,6 +39,13 @@ const Navbar: React.FC = () => {
                 {item.label}
               </Link>
             ))}
+            {/* Add Areas as disabled/under construction */}
+            <span className="text-blue-300 cursor-not-allowed relative group">
+              Areas
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Under Construction
+              </span>
+            </span>
           </div>
 
           <button
@@ -65,6 +72,10 @@ const Navbar: React.FC = () => {
                 {item.label}
               </Link>
             ))}
+            {/* Mobile under construction item */}
+            <div className="py-2 px-4 text-blue-300 cursor-not-allowed">
+              Areas (Under Construction)
+            </div>
           </div>
         )}
       </div>
