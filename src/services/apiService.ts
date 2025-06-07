@@ -42,7 +42,7 @@ export const getFeaturedMatches = async () => {
   }
 };
 
-export const getMatchById = async (id) => {
+export const getMatchById = async (id: number) => {
   try {
     const response = await apiClient.get(`/matches/${id}`);
     return response.data;
@@ -63,17 +63,18 @@ export const getTeams = async (options = {}) => {
   }
 };
 
-export const getTeamById = async (id) => {
+export const getTeamById = async (id: number, season: number = 2024) => {
   try {
-    const response = await apiClient.get(`/teams/${id}`);
-    return response.data;
+    // Change from path parameter to query parameter
+    const response = await axios.get(`${API_URL}/api/teams?id=${id}&season=${season}`);
+    return response.data.data;
   } catch (error) {
-    console.error(`Error fetching team with id ${id}:`, error);
+    console.error('Error fetching team:', error);
     throw error;
   }
 };
 
-export const getTeamMatches = async (teamId, options = {}) => {
+export const getTeamMatches = async (teamId: number, options = {}) => {
   try {
     const response = await apiClient.get(`/teams/${teamId}/matches`, { params: options });
     return response.data;
@@ -83,8 +84,19 @@ export const getTeamMatches = async (teamId, options = {}) => {
   }
 };
 
+export const getTeamPlayers = async (teamId: number, season: number = 2024) => {
+  try {
+    // Use query parameters
+    const response = await axios.get(`${API_URL}/api/teams?teamId=${teamId}&type=players&season=${season}`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching team players:', error);
+    throw error;
+  }
+};
+
 // Players API
-export const getPlayerById = async (id) => {
+export const getPlayerById = async (id:number) => {
   try {
     const response = await apiClient.get(`/players/${id}`);
     return response.data;
@@ -105,7 +117,7 @@ export const getAreas = async (options = {}) => {
   }
 };
 
-export const getAreaById = async (id) => {
+export const getAreaById = async (id:number) => {
   try {
     const response = await apiClient.get(`/areas/${id}`);
     return response.data;
@@ -126,7 +138,7 @@ export const getCompetitions = async (options = {}) => {
   }
 };
 
-export const getCompetitionById = async (id) => {
+export const getCompetitionById = async (id:number) => {
   try {
     const response = await apiClient.get(`/competitions/${id}`);
     return response.data;
