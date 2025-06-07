@@ -20,8 +20,8 @@ export interface Player {
     position: string;
     appearances: number;
     lineups: number;
-    minutes: number | null;  // Allow null
-    rating: string | null;   // Allow null
+    minutes: number | null;
+    rating: string | null;
     captain: boolean;
     goals: {
       total: number | null;
@@ -48,12 +48,15 @@ export interface Player {
   };
 }
 
-const API_URL = 'http://localhost:5000/api';
+// Use environment variable that works in both dev and production
+const API_URL = import.meta.env.VITE_API_URL || (
+  import.meta.env.PROD ? '' : 'http://localhost:5000'
+);
 
 export const playerService = {
   getPlayersByTeam: async (teamId: number, season: number = 2024) => {
     try {
-      const response = await axios.get(`${API_URL}/teams/${teamId}/players?season=${season}`);
+      const response = await axios.get(`${API_URL}/api/teams/${teamId}/players?season=${season}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching players:', error);
@@ -63,7 +66,7 @@ export const playerService = {
 
   getPlayerById: async (playerId: number, season: number = 2024) => {
     try {
-      const response = await axios.get(`${API_URL}/players/${playerId}?season=${season}`);
+      const response = await axios.get(`${API_URL}/api/players/${playerId}?season=${season}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching player:', error);
@@ -73,20 +76,10 @@ export const playerService = {
 
   searchPlayers: async (name: string, season: number = 2024) => {
     try {
-      const response = await axios.get(`${API_URL}/players/search?name=${encodeURIComponent(name)}&season=${season}`);
+      const response = await axios.get(`${API_URL}/api/players/search?name=${encodeURIComponent(name)}&season=${season}`);
       return response.data.data;
     } catch (error) {
       console.error('Error searching players:', error);
-      throw error;
-    }
-  },
-
-  getTeamStatistics: async (teamId: number, leagueId: number = 39, season: number = 2024) => {
-    try {
-      const response = await axios.get(`${API_URL}/teams/${teamId}/statistics?league=${leagueId}&season=${season}`);
-      return response.data.data;
-    } catch (error) {
-      console.error('Error fetching team statistics:', error);
       throw error;
     }
   }

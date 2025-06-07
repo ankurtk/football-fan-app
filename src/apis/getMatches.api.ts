@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// Use import.meta.env for Vite instead of process.env
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Use environment variable that works in both dev and production
+const API_URL = import.meta.env.VITE_API_URL || (
+  import.meta.env.PROD ? '' : 'http://localhost:5000'
+);
 
 export interface Match {
   id: number;
@@ -92,16 +94,13 @@ export const matchService = {
     }
   },
 
-  getLiveMatches: async (league?: number) => {
-    try {
-      // Include league parameter only if it's provided and not 0 (All Leagues)
-      const params = (league && league !== 0) ? `?league=${league}` : '';
-      const response = await axios.get(`${API_URL}/api/matches/live${params}`);
-      return response.data.data;
-    } catch (error) {
-      console.error('Error fetching live matches:', error);
-      throw error;
-    }
+  getLiveMatches: async (league?: number, teamName?: string) => {
+    const params = new URLSearchParams();
+    if (league && league !== 0) params.append('league', league.toString());
+    if (teamName) params.append('team_name', teamName);
+
+    const response = await axios.get(`${API_URL}/api/matches/live?${params}`);
+    return response.data.data;
   },
 
   getUpcomingMatches: async (league: number = 39) => {

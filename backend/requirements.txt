@@ -1,9 +1,0 @@
-Flask
-Flask-RESTful
-Flask-SQLAlchemy
-Flask-Cors
-marshmallow
-marshmallow-sqlalchemy
-flasgger
-requests
-python-dotenv

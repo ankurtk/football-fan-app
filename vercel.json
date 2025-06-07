@@ -1,0 +1,43 @@
+{
+  "functions": {
+    "api/*.js": {
+      "runtime": "@vercel/node"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/matches/live",
+      "dest": "/api/matches?type=live"
+    },
+    {
+      "src": "/api/teams/([0-9]+)/players",
+      "dest": "/api/teams/$1/players"
+    },
+    {
+      "src": "/api/teams/([0-9]+)",
+      "dest": "/api/teams/$1"
+    },
+    {
+      "src": "/api/players/search",
+      "dest": "/api/players/search"
+    },
+    {
+      "src": "/api/players/([0-9]+)",
+      "dest": "/api/players/$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ]
+}
