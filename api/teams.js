@@ -1,12 +1,5 @@
 export default async function handler(req, res) {
-  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
 
   const { league, season, search } = req.query;
   const rapidApiKey = process.env.RAPIDAPI_KEY;
@@ -15,7 +8,7 @@ export default async function handler(req, res) {
     if (!rapidApiKey) {
       return res.status(500).json({
         success: false,
-        error: 'Missing RAPIDAPI_KEY environment variable'
+        error: 'API key not configured'
       });
     }
 
@@ -28,7 +21,6 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // Transform data to match your frontend expectations
     const teams = data.response?.map(item => ({
       id: item.team.id,
       name: item.team.name,
@@ -37,7 +29,7 @@ export default async function handler(req, res) {
       founded: item.team.founded,
       national: item.team.national,
       logo: item.team.logo,
-      crest: item.team.logo, // Alias for compatibility
+      crest: item.team.logo,
       venue: item.venue?.name,
       venue_details: {
         id: item.venue?.id,
@@ -53,14 +45,10 @@ export default async function handler(req, res) {
     return res.json({
       success: true,
       data: teams,
-      count: teams.length,
-      source: 'rapidapi',
-      league_id: league,
-      season: season
+      count: teams.length
     });
 
   } catch (error) {
-    console.error('API Error:', error);
     return res.status(500).json({
       success: false,
       error: 'Failed to fetch teams data'

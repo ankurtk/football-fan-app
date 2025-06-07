@@ -1,20 +1,26 @@
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  const { id, season } = req.query;
+  const { name, season } = req.query;
   const rapidApiKey = process.env.RAPIDAPI_KEY;
 
   try {
-    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/players?team=${id}&season=${season || 2024}`, {
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name parameter is required'
+      });
+    }
+
+    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/players?search=${encodeURIComponent(name)}&season=${season || 2024}`, {
       headers: {
-        'X-RapidAPI-Key': rapidApiKey || '',
+        'X-RapidAPI-Key': rapidApiKey,
         'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
       }
     });
 
     const data = await response.json();
 
-    // Transform players data
     const players = data.response?.map(item => {
       const player = item.player || {};
       const statistics = item.statistics?.[0] || {};
@@ -43,7 +49,7 @@ export default async function handler(req, res) {
         },
         statistics: {
           position: games.position || 'N/A',
-          appearances: games.appearences || 0, // Note: API uses 'appearences'
+          appearances: games.appearences || 0,
           lineups: games.lineups || 0,
           minutes: games.minutes || 0,
           rating: games.rating || '0',
@@ -77,10 +83,7 @@ export default async function handler(req, res) {
     return res.json({
       success: true,
       data: players,
-      count: players.length,
-      team_id: id,
-      season_used: season || 2024,
-      data_source: 'rapidapi'
+      count: players.length
     });
 
   } catch (error) {
