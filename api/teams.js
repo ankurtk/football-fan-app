@@ -18,9 +18,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // If ID is provided, fetch specific team
+    // Handle individual team request
     if (id) {
-      console.log('Fetching team with ID:', id, 'Season:', season);
+      console.log('Fetching individual team:', id);
 
       const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/teams?id=${id}&season=${season || 2024}`, {
         headers: {
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Existing teams list logic
+    // Handle teams list request
     const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/teams?league=${league || 39}&season=${season || 2024}${search ? `&search=${search}` : ''}`, {
       headers: {
         'X-RapidAPI-Key': rapidApiKey,
