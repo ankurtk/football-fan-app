@@ -25,18 +25,11 @@ const TeamDetailPage: React.FC = () => {
 
       try {
         setLoading(true);
-        setError(null);
-
-        if (useRapidAPI) {
-          // Use RapidAPI for team details
-          const data = await teamService.getTeamById(parseInt(id), season);
-          setTeam(data);
-        } else {
-          // Fallback to original API (but this won't be used anymore)
-          const data = await teamService.getTeamById(parseInt(id));
-          setTeam(data);
-        }
+        // Make sure this calls your Vercel API
+        const teamData = await teamService.getTeamById(parseInt(id), season);
+        setTeam(teamData);
       } catch (err) {
+        console.error('Error fetching team:', err);
         setError(err instanceof Error ? err.message : 'Failed to load team details');
       } finally {
         setLoading(false);
@@ -44,7 +37,7 @@ const TeamDetailPage: React.FC = () => {
     };
 
     fetchTeam();
-  }, [id, useRapidAPI, season]);
+  }, [id, season]);
 
   // Fetch players when squad tab is selected
   useEffect(() => {

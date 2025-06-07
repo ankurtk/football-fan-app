@@ -18,6 +18,8 @@ export default async function handler(req, res) {
       });
     }
 
+    console.log('Fetching team with ID:', id, 'Season:', season);
+
     const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/teams?id=${id}&season=${season || 2024}`, {
       headers: {
         'X-RapidAPI-Key': rapidApiKey,
@@ -30,6 +32,8 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
+    console.log('RapidAPI response:', data);
+
     const teamData = data.response?.[0];
 
     if (!teamData) {
