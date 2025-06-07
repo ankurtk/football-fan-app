@@ -20,9 +20,9 @@ export default async function handler(req, res) {
 
     // Handle individual team request
     if (id) {
-      console.log('Fetching individual team:', id);
+      const apiUrl = `https://api-football-v1.p.rapidapi.com/v3/teams?id=${id}&season=${season || 2024}`;
 
-      const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/teams?id=${id}&season=${season || 2024}`, {
+      const response = await fetch(apiUrl, {
         headers: {
           'X-RapidAPI-Key': rapidApiKey,
           'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
@@ -30,7 +30,16 @@ export default async function handler(req, res) {
       });
 
       if (!response.ok) {
-        throw new Error(`RapidAPI responded with ${response.status}`);
+        return res.status(500).json({
+          success: false,
+          error: `RapidAPI responded with ${response.status}`,
+          debug: {
+            apiUrl,
+            status: response.status,
+            statusText: response.statusText,
+            hasApiKey: !!rapidApiKey
+          }
+        });
       }
 
       const data = await response.json();
@@ -39,7 +48,16 @@ export default async function handler(req, res) {
       if (!teamData) {
         return res.status(404).json({
           success: false,
-          error: 'Team not found'
+          error: 'Team not found',
+          debug: {
+            requestedId: id,
+            requestedSeason: season || 2024,
+            apiUrl,
+            rapidApiResponseCount: data.response?.length || 0,
+            rapidApiResponse: data.response || [],
+            hasApiKey: !!rapidApiKey,
+            timestamp: new Date().toISOString()
+          }
         });
       }
 
@@ -66,7 +84,12 @@ export default async function handler(req, res) {
 
       return res.json({
         success: true,
-        data: team
+        data: team,
+        debug: {
+          apiUrl,
+          rapidApiResponseCount: 1,
+          timestamp: new Date().toISOString()
+        }
       });
     }
 
@@ -108,11 +131,17 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('API Error:', error);
     return res.status(500).json({
       success: false,
       error: 'Failed to fetch teams data',
-      details: error.message
+      details: error.message,
+      debug: {
+        requestedId: id,
+        requestedSeason: season,
+        hasApiKey: !!rapidApiKey,
+        timestamp: new Date().toISOString(),
+        errorStack: error.stack
+      }
     });
   }
 }
