@@ -7,7 +7,8 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { id, season } = req.query;
+  // Get league from query or use default (39=Premier League)
+  const { id, season, league = 39 } = req.query;
   const rapidApiKey = process.env.RAPIDAPI_KEY;
 
   try {
@@ -18,7 +19,11 @@ export default async function handler(req, res) {
       });
     }
 
-    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/players?id=${id}&season=${season || 2024}`, {
+    // Add league parameter to the API URL
+    const apiUrl = `https://api-football-v1.p.rapidapi.com/v3/players?id=${id}&season=${season || 2024}&league=${league}`;
+    console.log('Fetching player data:', apiUrl);
+
+    const response = await fetch(apiUrl, {
       headers: {
         'X-RapidAPI-Key': rapidApiKey,
         'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
@@ -45,7 +50,7 @@ export default async function handler(req, res) {
     const goals = statistics.goals || {};
     const cards = statistics.cards || {};
     const team = statistics.team || {};
-    const league = statistics.league || {};
+    const leagueData = statistics.league || {};
     const birth = player.birth || {};
 
     const transformedPlayer = {
@@ -88,11 +93,11 @@ export default async function handler(req, res) {
         logo: team.logo || ''
       },
       current_league: {
-        id: league.id || 0,
-        name: league.name || 'Unknown',
-        country: league.country || 'Unknown',
-        logo: league.logo || '',
-        flag: league.flag || ''
+        id: leagueData.id || 0,
+        name: leagueData.name || 'Unknown',
+        country: leagueData.country || 'Unknown',
+        logo: leagueData.logo || '',
+        flag: leagueData.flag || ''
       }
     };
 

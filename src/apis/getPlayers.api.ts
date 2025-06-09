@@ -79,9 +79,10 @@ export const playerService = {
     }
   },
 
-  getPlayerById: async (playerId: number, season: number = 2024) => {
+  getPlayerById: async (playerId: number, season: number = 2024, league: number = 39) => {
     try {
-      const response = await axios.get(`${API_URL}/api/players/${playerId}?season=${season}`);
+      console.log(`Getting player ${playerId} for league ${league}`);
+      const response = await axios.get(`${API_URL}/api/players/${playerId}?season=${season}&league=${league}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching player:', error);
