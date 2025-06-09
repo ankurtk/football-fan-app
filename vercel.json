@@ -1,12 +1,7 @@
 {
-  "functions": {
-    "api/*.js": {
-      "runtime": "@vercel/node"
-    },
-    "api/**/*.js": {
-      "runtime": "@vercel/node"
-    }
-  },
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "routes": [
     {
       "src": "/api/(.*)",
