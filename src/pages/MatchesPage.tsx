@@ -127,7 +127,7 @@ const MatchesPage: React.FC = () => {
                 const leagueMatches = await matchService.getUpcomingMatches(league);
                 allUpcomingMatches.push(...(leagueMatches || []));
               } catch (err) {
-                console.warn(`Failed to fetch upcoming matches for league ${league}`);
+                console.warn(`Failed to fetch upcoming matches for league ${league}`,err);
               }
             }
             data = allUpcomingMatches;
