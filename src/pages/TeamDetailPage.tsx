@@ -11,6 +11,9 @@ const TeamDetailPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const useRapidAPI = searchParams.get('use_rapidapi') === 'true';
 
+  // Add default league parameter (39 = Premier League)
+  const defaultLeague = 39;
+
   const [team, setTeam] = useState<Team | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,19 +28,22 @@ const TeamDetailPage: React.FC = () => {
 
       try {
         setLoading(true);
-        // Make sure this calls your Vercel API
-        const teamData = await teamService.getTeamById(parseInt(id), season);
+        setError(null);
+
+        // Pass league parameter when getting team details
+        const teamData = await teamService.getTeamById(Number(id), undefined, defaultLeague);
         setTeam(teamData);
+
       } catch (err) {
         console.error('Error fetching team:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load team details');
+        setError('Failed to load team details. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchTeam();
-  }, [id, season]);
+  }, [id]);
 
   // Fetch players when squad tab is selected
   useEffect(() => {

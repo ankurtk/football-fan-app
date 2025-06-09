@@ -41,10 +41,9 @@ export const teamService = {
     }
   },
 
-  getTeamById: async (id: number, season: number = 2024) => {
+  getTeamById: async (id: number, season: number = 2024, league: number = 39) => {
     try {
-      // Use query parameter instead of path parameter
-      const response = await axios.get(`${API_URL}/api/teams?id=${id}&season=${season}`);
+      const response = await axios.get(`${API_URL}/api/teams?id=${id}&season=${season}&league=${league}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching team:', error);
