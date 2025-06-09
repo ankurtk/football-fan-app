@@ -83,88 +83,14 @@ export const playerService = {
     try {
       console.log(`Getting player ${playerId} for season ${season}`);
 
-      // Direct call to RapidAPI
-      const response = await axios.get(
-        `https://api-football-v1.p.rapidapi.com/v3/players`, {
-          params: {
-            id: playerId,
-            season: season
-          },
-          headers: {
-            'X-RapidAPI-Key': import.meta.env.RAPIDAPI_KEY,
-            'X-RapidAPI-Host': import.meta.env.RAPIDAPI_HOST || 'api-football-v1.p.rapidapi.com'
-          }
-        }
-      );
+      // Use your working API endpoint instead of direct RapidAPI
+      const response = await axios.get(`${API_URL}/api/players/${playerId}?season=${season}`);
 
-      // Check if player data exists
-      if (!response.data.response || response.data.response.length === 0) {
-        throw new Error('Player not found');
+      if (!response.data?.data) {
+        throw new Error('Player data not found in API response');
       }
 
-      // Transform API data to match your app's expected format
-      const playerData = response.data.response[0];
-      const player = playerData.player || {};
-      const statistics = playerData.statistics?.[0] || {};
-
-      // Extract nested objects safely
-      const games = statistics.games || {};
-      const goals = statistics.goals || {};
-      const cards = statistics.cards || {};
-      const team = statistics.team || {};
-      const league = statistics.league || {};
-      const birth = player.birth || {};
-
-      // Transform to your app's format
-      const transformedPlayer = {
-        id: player.id || 0,
-        name: player.name || 'Unknown',
-        firstname: player.firstname || '',
-        lastname: player.lastname || '',
-        age: player.age || 0,
-        nationality: player.nationality || 'Unknown',
-        height: player.height || 'N/A',
-        weight: player.weight || 'N/A',
-        photo: player.photo || '',
-        injured: player.injured || false,
-        birth: {
-          date: birth.date || '',
-          place: birth.place || 'Unknown',
-          country: birth.country || 'Unknown'
-        },
-        statistics: {
-          position: games.position || 'N/A',
-          appearances: games.appearences || 0,
-          lineups: games.lineups || 0,
-          minutes: games.minutes || 0,
-          rating: games.rating || '0',
-          captain: games.captain || false,
-          goals: {
-            total: goals.total || 0,
-            assists: goals.assists || 0,
-            saves: goals.saves || 0,
-            conceded: goals.conceded || 0
-          },
-          cards: {
-            yellow: cards.yellow || 0,
-            red: cards.red || 0
-          }
-        },
-        current_team: {
-          id: team.id || 0,
-          name: team.name || 'Unknown',
-          logo: team.logo || ''
-        },
-        current_league: {
-          id: league.id || 0,
-          name: league.name || 'Unknown',
-          country: league.country || 'Unknown',
-          logo: league.logo || '',
-          flag: league.flag || ''
-        }
-      };
-
-      return transformedPlayer;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching player:', error);
       throw error;
