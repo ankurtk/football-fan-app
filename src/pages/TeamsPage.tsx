@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search } from 'lucide-react';
 import Spinner from '../components/ui/Spinner';
 import { Team, teamService } from '../apis/getTeams.api';
 import CompetitionSelector from '../components/CompetitionSelector';
@@ -68,7 +67,7 @@ const TeamsPage: React.FC = () => {
           {teams.map(team => (
             <Link
               key={team.id}
-              to={`/teams/${team.id}?use_rapidapi=true`}
+              to={`/teams/${team.id}?use_rapidapi=true&league=${selectedLeague}`}
               className="card hover:shadow-lg transition-all duration-300"
             >
               <div className="p-6">

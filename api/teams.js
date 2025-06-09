@@ -24,9 +24,9 @@ export default async function handler(req, res) {
 
     // ROUTE 1: Get players from a specific team
     if (teamId && type === 'players') {
-      console.log(`Fetching players for team ${teamId}`);
+      console.log(`Fetching players for team ${teamId} in league ${league || 39}`);
       const response = await fetch(
-        `https://api-football-v1.p.rapidapi.com/v3/players?team=${teamId}&season=${season || 2024}`,
+        `https://api-football-v1.p.rapidapi.com/v3/players?team=${teamId}&season=${season || 2024}&league=${league || 39}`,
         {
           headers: {
             'X-RapidAPI-Key': rapidApiKey,

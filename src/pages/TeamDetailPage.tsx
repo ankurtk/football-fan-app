@@ -9,10 +9,9 @@ import PlayerCard from '../components/PlayerCard';
 const TeamDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
-  const useRapidAPI = searchParams.get('use_rapidapi') === 'true';
 
-  // Add default league parameter (39 = Premier League)
-  const defaultLeague = 39;
+  // Get league from URL params instead of using hardcoded default
+  const leagueId = parseInt(searchParams.get('league') || '39');
 
   const [team, setTeam] = useState<Team | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -30,8 +29,8 @@ const TeamDetailPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Pass league parameter when getting team details
-        const teamData = await teamService.getTeamById(Number(id), undefined, defaultLeague);
+        // Pass the league ID from URL params
+        const teamData = await teamService.getTeamById(Number(id), season, leagueId);
         setTeam(teamData);
 
       } catch (err) {
@@ -43,7 +42,7 @@ const TeamDetailPage: React.FC = () => {
     };
 
     fetchTeam();
-  }, [id]);
+  }, [id, leagueId, season]);
 
   // Fetch players when squad tab is selected
   useEffect(() => {
@@ -53,7 +52,7 @@ const TeamDetailPage: React.FC = () => {
       try {
         setPlayersLoading(true);
         // Since we're using RapidAPI for both teams and players, IDs are consistent
-        const playersData = await playerService.getPlayersByTeam(parseInt(id), season);
+        const playersData = await playerService.getPlayersByTeam(parseInt(id), season,leagueId);
         setPlayers(playersData);
       } catch (err) {
         console.error('Error fetching players:', err);
