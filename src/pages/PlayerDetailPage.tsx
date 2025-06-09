@@ -25,6 +25,27 @@ const PlayerDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log(`PlayerDetailPage: Loading player ${id} for league ${league}`);
+
+    // Clear browser cache for debugging
+    const forceCacheClear = async () => {
+      try {
+        await fetch(`/api/players/${id}?league=${league}&season=2024&_=${Date.now()}`, {
+          cache: 'no-cache',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
+      } catch (e) {
+        console.log('Cache clearing fetch failed:', e);
+      }
+    };
+
+    forceCacheClear();
+  }, [id, league]);
+
+  useEffect(() => {
     const fetchPlayer = async () => {
       try {
         setLoading(true);

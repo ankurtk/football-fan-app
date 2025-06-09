@@ -81,8 +81,26 @@ export const playerService = {
 
   getPlayerById: async (playerId: number, season: number = 2024, league: number = 39) => {
     try {
-      console.log(`Getting player ${playerId} for league ${league}`);
-      const response = await axios.get(`${API_URL}/api/players/${playerId}?season=${season}&league=${league}`);
+      console.log(`PlayerService: Getting player ${playerId} for league ${league}, season ${season}`);
+
+      // Add cache-busting query parameter
+      const response = await axios.get(
+        `${API_URL}/api/players/${playerId}?season=${season}&league=${league}&_=${Date.now()}`,
+        {
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        }
+      );
+
+      console.log('API response:', response.status, response.data);
+
+      if (!response.data?.data) {
+        console.error('Player data missing in response');
+        throw new Error('Player data not found in API response');
+      }
+
       return response.data.data;
     } catch (error) {
       console.error('Error fetching player:', error);
