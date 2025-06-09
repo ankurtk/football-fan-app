@@ -64,8 +64,8 @@ export default async function handler(req, res) {
     else if (id) {
       console.log(`Fetching team with ID: ${id}, season: ${season || 2024}`);
 
-      // Hardcode the full URL for debugging
-      const apiUrl = `https://api-football-v1.p.rapidapi.com/v3/teams?id=${id}&season=${season || 2024}`;
+      // Add league parameter (39 = Premier League)
+      const apiUrl = `https://api-football-v1.p.rapidapi.com/v3/teams?id=${id}&season=${season || 2024}&league=${league || 39}`;
       console.log('API URL:', apiUrl);
 
       const response = await fetch(apiUrl, {
