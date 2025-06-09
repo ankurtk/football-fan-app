@@ -56,7 +56,7 @@ const API_URL = import.meta.env.VITE_API_URL || (
 export const playerService = {
   getPlayersByTeam: async (teamId: number, season: number = 2024) => {
     try {
-      // Changed from path parameter to query parameter
+      // Use query parameters format to match your working API
       const response = await axios.get(`${API_URL}/api/teams?teamId=${teamId}&type=players&season=${season}`);
       return response.data.data;
     } catch (error) {
