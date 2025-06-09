@@ -65,7 +65,6 @@ export const playerService = {
           teamId,
           type: 'players',
           season,
-          league
         }
       });
 
