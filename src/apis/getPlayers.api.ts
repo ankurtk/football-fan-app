@@ -54,24 +54,9 @@ const API_URL = import.meta.env.VITE_API_URL || (
 );
 
 export const playerService = {
-  getPlayersByTeam: async (teamId: number, season: number = 2024, league: number = 39) => {
+  getPlayersByTeam: async (teamId: number, season: number = 2024, league: number =39) => {
     try {
-      // Add console.log for debugging
-      console.log(`Fetching players for team ${teamId}, season ${season}, league ${league}`);
-
-      // Make sure API_URL is correct
-      const response = await axios.get(`${API_URL}/api/teams`, {
-        params: {
-          teamId,
-          type: 'players',
-          season,
-          league
-        }
-      });
-
-      // Log response for debugging
-      console.log(`Got ${response.data?.data?.length || 0} players from API`);
-
+      const response = await axios.get(`${API_URL}/api/teams/${teamId}/players?season=${season}&league=${league}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching players:', error);
@@ -79,28 +64,9 @@ export const playerService = {
     }
   },
 
-  getPlayerById: async (playerId: number, season: number = 2024, league: number = 39) => {
+  getPlayerById: async (playerId: number, season: number = 2024) => {
     try {
-      console.log(`PlayerService: Getting player ${playerId} for league ${league}, season ${season}`);
-
-      // Add cache-busting query parameter
-      const response = await axios.get(
-        `${API_URL}/api/players/${playerId}?season=${season}&league=${league}&_=${Date.now()}`,
-        {
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        }
-      );
-
-      console.log('API response:', response.status, response.data);
-
-      if (!response.data?.data) {
-        console.error('Player data missing in response');
-        throw new Error('Player data not found in API response');
-      }
-
+      const response = await axios.get(`${API_URL}/api/players/${playerId}?season=${season}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching player:', error);
