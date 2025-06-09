@@ -54,9 +54,24 @@ const API_URL = import.meta.env.VITE_API_URL || (
 );
 
 export const playerService = {
-  getPlayersByTeam: async (teamId: number, season: number = 2024, league: number =39) => {
+  getPlayersByTeam: async (teamId: number, season: number = 2024, league: number = 39) => {
     try {
-      const response = await axios.get(`${API_URL}/api/teams/${teamId}/players?season=${season}&league=${league}`);
+      // Add console.log for debugging
+      console.log(`Fetching players for team ${teamId}, season ${season}, league ${league}`);
+
+      // Make sure API_URL is correct
+      const response = await axios.get(`${API_URL}/api/teams`, {
+        params: {
+          teamId,
+          type: 'players',
+          season,
+          league
+        }
+      });
+
+      // Log response for debugging
+      console.log(`Got ${response.data?.data?.length || 0} players from API`);
+
       return response.data.data;
     } catch (error) {
       console.error('Error fetching players:', error);
