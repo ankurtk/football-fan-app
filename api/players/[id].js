@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { id, season } = req.query;
+  const { id, season, league } = req.query;
   const rapidApiKey = process.env.RAPIDAPI_KEY;
 
   try {
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/players?id=${id}`, {
+    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/players?id=${id}&season=${season || 2024}&league=${league || 39}`, {
       headers: {
         'X-RapidAPI-Key': rapidApiKey,
         'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
