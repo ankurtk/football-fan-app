@@ -91,8 +91,8 @@ export const playerService = {
             season: season
           },
           headers: {
-            'X-RapidAPI-Key': import.meta.env.VITE_RAPIDAPI_KEY,
-            'X-RapidAPI-Host': import.meta.env.VITE_RAPIDAPI_HOST || 'api-football-v1.p.rapidapi.com'
+            'X-RapidAPI-Key': import.meta.env.RAPIDAPI_KEY,
+            'X-RapidAPI-Host': import.meta.env.RAPIDAPI_HOST || 'api-football-v1.p.rapidapi.com'
           }
         }
       );
