@@ -1,107 +1,112 @@
 export default async function handler(req, res) {
-  // Add CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Extract all query parameters
-  const { id } = req.query;
-  const season = req.query.season || 2024;
-  const league = req.query.league || 39;
-
-  // For debugging
-  console.log(`Player API called with id=${id}, season=${season}, league=${league}`);
+  const { id, season } = req.query;
+  const rapidApiKey = process.env.RAPIDAPI_KEY;
 
   try {
-    const rapidApiKey = process.env.RAPIDAPI_KEY;
     if (!rapidApiKey) {
-      console.error('API key is not configured');
       return res.status(500).json({
         success: false,
         error: 'API key not configured'
       });
     }
 
-    // Force no-cache to ensure fresh data
-    const apiUrl = `https://api-football-v1.p.rapidapi.com/v3/players?id=${id}&season=${season}&league=${league}`;
-    console.log('Calling RapidAPI:', apiUrl);
-
-    const response = await fetch(apiUrl, {
+    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/players?id=${id}&season=${season || 2024}`, {
       headers: {
         'X-RapidAPI-Key': rapidApiKey,
-        'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com',
-        // Force fresh data
-        'Cache-Control': 'no-cache'
+        'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
       }
     });
 
     if (!response.ok) {
-      console.error(`RapidAPI error: ${response.status}`);
-      return res.status(response.status).json({
-        success: false,
-        error: `RapidAPI responded with ${response.status}`,
-        url: apiUrl
-      });
+      throw new Error(`RapidAPI responded with ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('RapidAPI response:', JSON.stringify(data).substring(0, 200) + '...');
+    const playerData = data.response?.[0];
 
-    // Check if player data exists
-    if (!data.response || data.response.length === 0) {
-      console.log('No player data found');
+    if (!playerData) {
       return res.status(404).json({
         success: false,
-        error: 'Player not found',
-        debug: {
-          id,
-          season,
-          league,
-          responsePreview: data
-        }
+        error: 'Player not found'
       });
     }
 
-    // Get player data from first result
-    const playerData = data.response[0];
-    const player = playerData.player;
-    const statistics = playerData.statistics && playerData.statistics.length > 0
-      ? playerData.statistics[0]
-      : {};
+    const player = playerData.player || {};
+    const statistics = playerData.statistics?.[0] || {};
+    const games = statistics.games || {};
+    const goals = statistics.goals || {};
+    const cards = statistics.cards || {};
+    const team = statistics.team || {};
+    const league = statistics.league || {};
+    const birth = player.birth || {};
 
-    // Transform data
     const transformedPlayer = {
-      id: player.id,
-      name: player.name,
-      firstname: player.firstname,
-      lastname: player.lastname,
-      age: player.age,
-      nationality: player.nationality,
-      height: player.height,
-      weight: player.weight,
-      photo: player.photo,
-      // Add other fields as needed
+      id: player.id || 0,
+      name: player.name || 'Unknown',
+      firstname: player.firstname || '',
+      lastname: player.lastname || '',
+      age: player.age || 0,
+      nationality: player.nationality || 'Unknown',
+      height: player.height || 'N/A',
+      weight: player.weight || 'N/A',
+      photo: player.photo || '',
+      injured: player.injured || false,
+      birth: {
+        date: birth.date || '',
+        place: birth.place || 'Unknown',
+        country: birth.country || 'Unknown'
+      },
       statistics: {
-        // Map statistics fields here
+        position: games.position || 'N/A',
+        appearances: games.appearences || 0,
+        lineups: games.lineups || 0,
+        minutes: games.minutes || 0,
+        rating: games.rating || '0',
+        captain: games.captain || false,
+        goals: {
+          total: goals.total || 0,
+          assists: goals.assists || 0,
+          saves: goals.saves || 0,
+          conceded: goals.conceded || 0
+        },
+        cards: {
+          yellow: cards.yellow || 0,
+          red: cards.red || 0
+        }
+      },
+      current_team: {
+        id: team.id || 0,
+        name: team.name || 'Unknown',
+        logo: team.logo || ''
+      },
+      current_league: {
+        id: league.id || 0,
+        name: league.name || 'Unknown',
+        country: league.country || 'Unknown',
+        logo: league.logo || '',
+        flag: league.flag || ''
       }
     };
 
-    console.log(`Successfully retrieved player ${player.name}`);
     return res.json({
       success: true,
       data: transformedPlayer
     });
 
   } catch (error) {
-    console.error('Player API error:', error);
+    console.error('API Error:', error);
     return res.status(500).json({
       success: false,
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: 'Failed to fetch player data',
+      details: error.message
     });
   }
 }
