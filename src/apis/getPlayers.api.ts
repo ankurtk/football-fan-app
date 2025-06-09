@@ -83,39 +83,23 @@ export const playerService = {
     try {
       console.log(`Getting player ${playerId} for season ${season}`);
 
-      // Temporary: Direct RapidAPI call with proper environment variable
-      const response = await axios.get('https://api-football-v1.p.rapidapi.com/v3/players', {
-        params: {
-          id: playerId,
-          season: season
-        },
-        headers: {
-          'X-RapidAPI-Key': 'b6a917c7bcmsh7fbd02bc5446134p127c98jsnd231ce01822f',
-          'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
-        }
-      });
+      // Use your working API endpoint instead of direct RapidAPI
+       const response = await axios.get('https://api-football-v1.p.rapidapi.com/v3/players', {
+      params: {
+        id: playerId,
+        season: season
+      },
+      headers: {
+        'X-RapidAPI-Key': 'b6a917c7bcmsh7fbd02bc5446134p127c98jsnd231ce01822f',
+        'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+      }
+    });
 
-      if (!response.data?.response || response.data.response.length === 0) {
-        throw new Error('Player not found');
+      if (!response.data?.data) {
+        throw new Error('Player data not found in API response');
       }
 
-      // Transform the data
-      const playerData = response.data.response[0];
-      const player = playerData.player || {};
-
-      return {
-        id: player.id,
-        name: player.name,
-        firstname: player.firstname,
-        lastname: player.lastname,
-        age: player.age,
-        photo: player.photo,
-        nationality: player.nationality,
-        height: player.height,
-        weight: player.weight,
-        // Add other fields as needed
-      };
-
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching player:', error);
       throw error;
