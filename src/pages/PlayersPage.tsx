@@ -51,7 +51,7 @@ const PlayersPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const playersData = await playerService.getPlayersByTeam(parseInt(selectedTeam), season);
+        const playersData = await playerService.getPlayersByTeam(parseInt(selectedTeam), season, selectedLeague);
         setPlayers(playersData);
       } catch{
         setError('Failed to fetch players. Try selecting a different team.');
