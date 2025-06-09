@@ -159,7 +159,10 @@ const PlayersPage: React.FC = () => {
       {!loading && players.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {players.map(player => (
-            <Link key={player.id} to={`/players/${player.id}`}>
+            <Link
+              key={player.id}
+              to={`/players/${player.id}?league=${selectedLeague}`}
+            >
               <PlayerCard player={player} />
             </Link>
           ))}
