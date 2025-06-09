@@ -161,7 +161,7 @@ const PlayersPage: React.FC = () => {
           {players.map(player => (
             <Link
               key={player.id}
-              to={`/players/${player.id}?league=${selectedLeague}`}
+              to={`/players/${player.id}`}
             >
               <PlayerCard player={player} />
             </Link>
