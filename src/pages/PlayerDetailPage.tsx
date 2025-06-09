@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, User, Calendar, MapPin, Award, Activity, Target, Clock } from 'lucide-react';
 import Spinner from '../components/ui/Spinner';
 import { playerService, Player } from '../apis/getPlayers.api';
@@ -17,10 +17,6 @@ interface ApiError {
 
 const PlayerDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
-
-  // Extract league from URL params
-  const league = parseInt(searchParams.get('league') || '39');
 
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,8 +26,8 @@ const PlayerDetailPage: React.FC = () => {
     const fetchPlayer = async () => {
       try {
         setLoading(true);
-        // Pass the league parameter here
-        const playerData = await playerService.getPlayerById(Number(id), 2024, league);
+        // Remove league parameter
+        const playerData = await playerService.getPlayerById(Number(id), 2024);
         setPlayer(playerData);
       } catch (err: unknown) {
         console.error('Error fetching player:', err);
@@ -55,7 +51,7 @@ const PlayerDetailPage: React.FC = () => {
     };
 
     fetchPlayer();
-  }, [id, league]);
+  }, [id]); // Remove league from dependencies
 
   if (loading) {
     return (

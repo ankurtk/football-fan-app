@@ -7,10 +7,14 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { id, season, league } = req.query;
-  const rapidApiKey = process.env.RAPIDAPI_KEY;
+  const { id } = req.query;
+  const season = req.query.season || 2024;
+  // Remove league parameter - not needed per documentation
+
+  console.log(`API: Fetching player ${id} for season ${season}`);
 
   try {
+    const rapidApiKey = process.env.RAPIDAPI_KEY;
     if (!rapidApiKey) {
       return res.status(500).json({
         success: false,
@@ -18,7 +22,11 @@ export default async function handler(req, res) {
       });
     }
 
-    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/players?id=${id}&season=${season || 2024}&league=${league || 39}`, {
+    // FIXED: Match the exact RapidAPI URL format - no league parameter
+    const apiUrl = `https://api-football-v1.p.rapidapi.com/v3/players?id=${id}&season=${season}`;
+    console.log('Calling RapidAPI:', apiUrl);
+
+    const response = await fetch(apiUrl, {
       headers: {
         'X-RapidAPI-Key': rapidApiKey,
         'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'

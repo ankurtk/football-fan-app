@@ -79,10 +79,11 @@ export const playerService = {
     }
   },
 
-  getPlayerById: async (playerId: number, season: number = 2024, league: number = 39) => {
+  getPlayerById: async (playerId: number, season: number = 2024) => {
     try {
-      console.log(`Getting player ${playerId} for season ${season}, league ${league}`);
-      const response = await axios.get(`${API_URL}/api/players/${playerId}?season=${season}&league=${league}`);
+      // Remove league parameter from frontend API call
+      console.log(`Getting player ${playerId} for season ${season}`);
+      const response = await axios.get(`${API_URL}/api/players/${playerId}?season=${season}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching player:', error);

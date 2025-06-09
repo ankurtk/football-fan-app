@@ -101,7 +101,7 @@ const PlayerSearchPage: React.FC = () => {
           {players.map(player => (
             <Link
               key={player.id}
-              to={`/players/${player.id}?league=${player.current_league?.id || '39'}`}
+              to={`/players/${player.id}?season=2024`}
             >
               <PlayerCard player={player} />
             </Link>
