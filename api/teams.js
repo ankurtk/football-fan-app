@@ -7,20 +7,66 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { league, season, search, id } = req.query;
-  const rapidApiKey = process.env.RAPIDAPI_KEY;
-
   try {
+    // Get all query parameters
+    const { league, season, search, id, teamId, type } = req.query;
+
+    // First: check environment variable
+    const rapidApiKey = process.env.RAPIDAPI_KEY;
     if (!rapidApiKey) {
+      console.error('API key is not configured');
       return res.status(500).json({
         success: false,
-        error: 'API key not configured'
+        error: 'API key not configured',
+        debug: { env: Object.keys(process.env).filter(k => !k.includes('SECRET')) }
       });
     }
 
-    // Handle individual team request
-    if (id) {
+    // ROUTE 1: Get players from a specific team
+    if (teamId && type === 'players') {
+      console.log(`Fetching players for team ${teamId}`);
+      const response = await fetch(
+        `https://api-football-v1.p.rapidapi.com/v3/players?team=${teamId}&season=${season || 2024}`,
+        {
+          headers: {
+            'X-RapidAPI-Key': rapidApiKey,
+            'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`RapidAPI responded with ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Transform player data here...
+      const players = data.response?.map(item => {
+        // Your existing player transformation code...
+        const player = item.player || {};
+        // Transform and return player data...
+        return {
+          id: player.id || 0,
+          name: player.name || 'Unknown',
+          // Other player properties...
+        };
+      }) || [];
+
+      return res.json({
+        success: true,
+        data: players,
+        count: players.length
+      });
+    }
+
+    // ROUTE 2: Get a specific team by ID
+    else if (id) {
+      console.log(`Fetching team with ID: ${id}, season: ${season || 2024}`);
+
+      // Hardcode the full URL for debugging
       const apiUrl = `https://api-football-v1.p.rapidapi.com/v3/teams?id=${id}&season=${season || 2024}`;
+      console.log('API URL:', apiUrl);
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -30,37 +76,28 @@ export default async function handler(req, res) {
       });
 
       if (!response.ok) {
-        return res.status(500).json({
-          success: false,
-          error: `RapidAPI responded with ${response.status}`,
-          debug: {
-            apiUrl,
-            status: response.status,
-            statusText: response.statusText,
-            hasApiKey: !!rapidApiKey
-          }
-        });
+        throw new Error(`RapidAPI responded with ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('RapidAPI response:', JSON.stringify(data).substring(0, 200) + '...');
+
       const teamData = data.response?.[0];
 
+      // If no team found, return 404
       if (!teamData) {
         return res.status(404).json({
           success: false,
           error: 'Team not found',
           debug: {
             requestedId: id,
-            requestedSeason: season || 2024,
             apiUrl,
-            rapidApiResponseCount: data.response?.length || 0,
-            rapidApiResponse: data.response || [],
-            hasApiKey: !!rapidApiKey,
-            timestamp: new Date().toISOString()
+            responsePreview: data
           }
         });
       }
 
+      // Transform team data
       const team = {
         id: teamData.team.id,
         name: teamData.team.name,
@@ -84,64 +121,65 @@ export default async function handler(req, res) {
 
       return res.json({
         success: true,
-        data: team,
-        debug: {
-          apiUrl,
-          rapidApiResponseCount: 1,
-          timestamp: new Date().toISOString()
-        }
+        data: team
       });
     }
 
-    // Handle teams list request
-    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/teams?league=${league || 39}&season=${season || 2024}${search ? `&search=${search}` : ''}`, {
-      headers: {
-        'X-RapidAPI-Key': rapidApiKey,
-        'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+    // ROUTE 3: Get a list of teams
+    else {
+      console.log(`Fetching teams for league: ${league || 39}, season: ${season || 2024}`);
+
+      const response = await fetch(
+        `https://api-football-v1.p.rapidapi.com/v3/teams?league=${league || 39}&season=${season || 2024}${search ? `&search=${search}` : ''}`,
+        {
+          headers: {
+            'X-RapidAPI-Key': rapidApiKey,
+            'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`RapidAPI responded with ${response.status}`);
       }
-    });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    const teams = data.response?.map(item => ({
-      id: item.team.id,
-      name: item.team.name,
-      code: item.team.code,
-      country: item.team.country,
-      founded: item.team.founded,
-      national: item.team.national,
-      logo: item.team.logo,
-      crest: item.team.logo,
-      venue: item.venue?.name,
-      venue_details: {
-        id: item.venue?.id,
-        name: item.venue?.name,
-        address: item.venue?.address,
-        city: item.venue?.city,
-        capacity: item.venue?.capacity,
-        surface: item.venue?.surface,
-        image: item.venue?.image
-      }
-    })) || [];
+      const teams = data.response?.map(item => ({
+        id: item.team.id,
+        name: item.team.name,
+        code: item.team.code,
+        country: item.team.country,
+        founded: item.team.founded,
+        national: item.team.national,
+        logo: item.team.logo,
+        crest: item.team.logo,
+        venue: item.venue?.name,
+        venue_details: {
+          id: item.venue?.id,
+          name: item.venue?.name,
+          address: item.venue?.address,
+          city: item.venue?.city,
+          capacity: item.venue?.capacity,
+          surface: item.venue?.surface,
+          image: item.venue?.image
+        }
+      })) || [];
 
-    return res.json({
-      success: true,
-      data: teams,
-      count: teams.length
-    });
+      return res.json({
+        success: true,
+        data: teams,
+        count: teams.length
+      });
+    }
 
   } catch (error) {
+    console.error('API Error:', error);
     return res.status(500).json({
       success: false,
       error: 'Failed to fetch teams data',
       details: error.message,
-      debug: {
-        requestedId: id,
-        requestedSeason: season,
-        hasApiKey: !!rapidApiKey,
-        timestamp: new Date().toISOString(),
-        errorStack: error.stack
-      }
+      stack: error.stack
     });
   }
 }
