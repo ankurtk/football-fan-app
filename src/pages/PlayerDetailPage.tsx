@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, User, Calendar, MapPin, Award, Activity, Target, Clock } from 'lucide-react';
 import Spinner from '../components/ui/Spinner';
 import { playerService, Player } from '../apis/getPlayers.api';
@@ -17,41 +17,22 @@ interface ApiError {
 
 const PlayerDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
-  // Get league from URL or use default
-  const league = parseInt(searchParams.get('league') || '39');
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log(`PlayerDetailPage: Loading player ${id} for league ${league}`);
-
-    // Clear browser cache for debugging
-    const forceCacheClear = async () => {
-      try {
-        await fetch(`/api/players/${id}?league=${league}&season=2024&_=${Date.now()}`, {
-          cache: 'no-cache',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-      } catch (e) {
-        console.log('Cache clearing fetch failed:', e);
-      }
-    };
-
-    forceCacheClear();
-  }, [id, league]);
-
-  useEffect(() => {
     const fetchPlayer = async () => {
+      if (!id) return;
+
       try {
         setLoading(true);
-        // Pass the league parameter
-        const playerData = await playerService.getPlayerById(Number(id), 2024, league);
-        setPlayer(playerData);
+        setError(null);
+        console.log(`Fetching player with ID: ${id}`); // Debug log
+
+        const data = await playerService.getPlayerById(parseInt(id));
+        console.log('Player data received:', data); // Debug log
+        setPlayer(data);
       } catch (err: unknown) {
         console.error('Error fetching player:', err);
 
@@ -74,7 +55,7 @@ const PlayerDetailPage: React.FC = () => {
     };
 
     fetchPlayer();
-  }, [id, league]);
+  }, [id]);
 
   if (loading) {
     return (
